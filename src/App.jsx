@@ -39,6 +39,7 @@ import {
   HOURLY_VARIABLES,
 } from "./services/airQualityService";
 import CitySelector from "./components/CitySelector";
+import AqiPredictorForm from "./components/AqiPredictorForm";
 import "./App.css";
 
 function App() {
@@ -500,6 +501,12 @@ function App() {
             </p>
           </article>
         </section>
+
+        {/* Machine Learning Model Prediction Section */}
+        <AqiPredictorForm
+          livePollutants={current}
+          selectedCityName={selectedCity.name}
+        />
 
         {/* Secondary Grid: Pollutant Levels & Monitored Locations */}
         <section className="secondary-grid">
