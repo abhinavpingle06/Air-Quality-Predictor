@@ -1109,6 +1109,35 @@ body {
   border-radius: 6px;
 }
 
+.algo-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.algo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.lr-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.knn-badge {
+  background: #fdf4ff;
+  color: #a21caf;
+  border: 1px solid #f5d0fe;
+}
+
 .backend-status-pill {
   display: inline-flex;
   align-items: center;
@@ -1185,6 +1214,33 @@ body {
   cursor: not-allowed;
 }
 
+.form-action-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-advanced-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-advanced-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
 .reset-form-btn {
   display: inline-flex;
   align-items: center;
@@ -1202,6 +1258,52 @@ body {
 .reset-form-btn:hover:not(:disabled) {
   background: #f1f5f9;
   color: #334155;
+}
+
+.advanced-inputs-box {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.advanced-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #334155;
+}
+
+.advanced-header small {
+  font-size: 10.5px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.date-fields-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 6px;
+}
+
+.date-fields-row input {
+  padding: 7px 8px;
+  text-align: center;
+}
+
+.lr-sub {
+  color: #0369a1 !important;
+}
+
+.knn-sub {
+  font-weight: 600;
 }
 
 .autofill-note {

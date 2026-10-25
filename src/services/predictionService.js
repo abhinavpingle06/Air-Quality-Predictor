@@ -1,6 +1,6 @@
 /**
  * Prediction Service for FastAPI Backend Integration
- * Communicates with the trained Random Forest AQI models via REST endpoints.
+ * Communicates with the trained Linear Regression & KNN AQI models via REST endpoints.
  */
 
 const BACKEND_BASE_URL =
@@ -24,6 +24,9 @@ export async function checkBackendHealth() {
       online: true,
       status: data.status,
       modelsLoaded: data.models_loaded,
+      regressorType: data.regressor_type,
+      classifierType: data.classifier_type,
+      featureCount: data.feature_count,
       message: data.message,
     };
   } catch (err) {
@@ -53,19 +56,18 @@ export async function fetchModelInfo() {
 }
 
 /**
- * Send 5 pollutant measurements to POST /predict
+ * Send pollutant measurements and date to POST /predict
  * @param {Object} inputs
- * @param {number} inputs.pm2_5
- * @param {number} inputs.pm10
- * @param {number} inputs.no
- * @param {number} inputs.no2
- * @param {number} inputs.so2
  * @param {AbortSignal} [signal]
  */
 export async function predictAqi(inputs, signal) {
-  const { pm2_5, pm10, no, no2, so2 } = inputs;
+  const {
+    pm2_5, pm10, no, no2, so2,
+    o3, co, nox, nh3, benzene, toluene, xylene,
+    year, month, day,
+  } = inputs;
 
-  // Client-side pre-validation
+  // Validate required core pollutants
   const missing = [];
   if (pm2_5 === "" || pm2_5 == null || isNaN(Number(pm2_5))) missing.push("PM2.5");
   if (pm10 === "" || pm10 == null || isNaN(Number(pm10))) missing.push("PM10");
@@ -74,27 +76,34 @@ export async function predictAqi(inputs, signal) {
   if (so2 === "" || so2 == null || isNaN(Number(so2))) missing.push("SO2");
 
   if (missing.length > 0) {
-    throw new Error(`Please provide valid numeric values for: ${missing.join(", ")}`);
+    throw new Error(`Please provide valid numeric values for required pollutants: ${missing.join(", ")}`);
   }
 
-  const numPm25 = Number(pm2_5);
-  const numPm10 = Number(pm10);
-  const numNo = Number(no);
-  const numNo2 = Number(no2);
-  const numSo2 = Number(so2);
-
-  if (numPm25 < 0 || numPm10 < 0 || numNo < 0 || numNo2 < 0 || numSo2 < 0) {
-    throw new Error("Pollutant concentrations cannot be negative.");
-  }
-
-  // Exact JSON payload matching Pydantic alias fields
+  // Construct payload matching Pydantic alias fields
   const payload = {
-    "PM2.5": numPm25,
-    "PM10": numPm10,
-    "NO": numNo,
-    "NO2": numNo2,
-    "SO2": numSo2,
+    "PM2.5": Number(pm2_5),
+    "PM10": Number(pm10),
+    "NO": Number(no),
+    "NO2": Number(no2),
+    "SO2": Number(so2),
   };
+
+  // Optional pollutants (send if provided)
+  const parseOptional = (val) => (val !== "" && val != null && !isNaN(Number(val)) ? Number(val) : null);
+
+  if (o3 !== "" && o3 != null) payload["O3"] = parseOptional(o3);
+  if (co !== "" && co != null) payload["CO"] = parseOptional(co);
+  if (nox !== "" && nox != null) payload["NOx"] = parseOptional(nox);
+  if (nh3 !== "" && nh3 != null) payload["NH3"] = parseOptional(nh3);
+  if (benzene !== "" && benzene != null) payload["Benzene"] = parseOptional(benzene);
+  if (toluene !== "" && toluene != null) payload["Toluene"] = parseOptional(toluene);
+  if (xylene !== "" && xylene != null) payload["Xylene"] = parseOptional(xylene);
+
+  // Date features
+  const now = new Date();
+  payload["Year"] = year ? parseInt(year, 10) : now.getFullYear();
+  payload["Month"] = month ? parseInt(month, 10) : now.getMonth() + 1;
+  payload["Day"] = day ? parseInt(day, 10) : now.getDate();
 
   try {
     const response = await fetch(`${BACKEND_BASE_URL}/predict`, {
@@ -127,6 +136,10 @@ export async function predictAqi(inputs, signal) {
       predictedAqi: data.predicted_aqi,
       predictedBucket: data.predicted_aqi_bucket,
       modelVersion: data.model_version,
+      algorithms: data.algorithms || {
+        regression: "Linear Regression",
+        classification: "K-Nearest Neighbors (KNN)",
+      },
       inputsUsed: data.inputs_used,
     };
   } catch (err) {
